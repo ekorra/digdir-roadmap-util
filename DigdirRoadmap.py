@@ -52,7 +52,7 @@ class DigdirRoadmapItem:
             "state": self.state,
             "tracked": self.numberOfTrackedIssues,
             "solved": self.numberOfSovedIssues,
-            "labels": labels
+            "labels": self.labels
         }.items()
 
     def __repr__(self) -> str:
@@ -93,6 +93,8 @@ class DigdirRoadmapItem:
         closed = [x for x in trackedIssue["nodes"] if x['state'] == 'CLOSED']
         self.numberOfSovedIssues = len(closed)
 
+def getEspen():
+    return "Espen"
 
 def getDigdirRoadmap():
     githubProjectNodes = getGithubProjectNodes()
