@@ -16,7 +16,7 @@ subject = "Email Subject"
 body = "This is the body of the text message"
 sender = "ekorra@gmail.com"
 recipients = ["espen.korra@digdir.no"]
-password = "ucrftkrwpxgotxal" 
+password = "" 
 
 def send_email(subject, body, sender, recipients, password):
     
