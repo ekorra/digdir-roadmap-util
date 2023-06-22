@@ -7,11 +7,7 @@
       "request": "launch",
       "program": "${file}",
       "console": "integratedTerminal",
-      "args": [
-        "--type=csv",
-        "--token=Bearer ",
-        "--testrun"
-      ],
+      "args": ["--type=csv", "--testrun"],
       "justMyCode": true
     }
     //,
