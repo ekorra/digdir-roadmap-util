@@ -96,8 +96,8 @@ class DigdirRoadmapItem:
 def getEspen():
     return "Espen"
 
-def getDigdirRoadmap():
-    githubProjectNodes = getGithubProjectNodes()
+def getDigdirRoadmap(authorizationToken):
+    githubProjectNodes = getGithubProjectNodes(authorizationToken)
 
     roadmapItems = []
     for node in githubProjectNodes:

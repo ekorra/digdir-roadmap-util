@@ -1,15 +1,11 @@
 from gql import Client, gql
 from gql.transport.aiohttp import AIOHTTPTransport
-import os
 
 
-def getGithubProjectNodes():
-
-    TOKEN = os.getenv('DIGIDIR_ROADMAP_TOKEN')
-
+def getGithubProjectNodes(authorizationToken):
     # Select your transport with a defined url endpoint
     transport = AIOHTTPTransport(url="https://api.github.com/graphql", headers={
-        'Authorization': TOKEN})
+        'Authorization': authorizationToken})
     # Create a GraphQL client using the defined transport
     client = Client(transport=transport, fetch_schema_from_transport=True)
 

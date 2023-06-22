@@ -15,9 +15,9 @@ parser.add_argument("--token", required=True,
                     help="Toeken required \"Bearer ghp_AbdcaADF...\"")
 args = parser.parse_args()
 
-os.environ['DIGIDIR_ROADMAP_TOKEN'] = args.token
+authorizationToken = args.token
 
-roadmapItems = getDigdirRoadmap()
+roadmapItems = getDigdirRoadmap(authorizationToken)
 
 filename = args.file
 
