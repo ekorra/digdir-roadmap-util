@@ -7,16 +7,14 @@ import io
 import csv
 
 
-def send_email(subject, body, sender, recipients, password, mail_attachment):
+def send_email(subject: str, body, sender: str, recipients: list, password: str, report_file: io.StringIO, report_file_name: str):
 
-    # with open("test.txt", "rb") as attachment:
-    # Add the attachment to the message
     part = MIMEBase("application", "octet-stream")
-    part.set_payload(mail_attachment.read())
+    part.set_payload(report_file.read())
     encoders.encode_base64(part)
     part.add_header(
         "Content-Disposition",
-        f"attachment; filename= roadmapreport.csv",)
+        f"attachment; filename= {report_file_name}.csv")
 
     msg = MIMEMultipart()
     msg['Subject'] = subject

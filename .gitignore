@@ -162,4 +162,4 @@ cython_debug/
 
 
 .python_packages
-roadmap.pickle
+/output

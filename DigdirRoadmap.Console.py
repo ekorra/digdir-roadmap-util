@@ -6,6 +6,8 @@ import argparse
 import os
 import pickle
 import shutil
+import datetime
+
 
 parser = argparse.ArgumentParser()
 parser.add_argument("--file", default="roadmap", type=str,
@@ -24,36 +26,42 @@ authorizationToken = smtp_account = os.getenv("DIGIDIR_ROADMAP_TOKEN")
 if args.testrun == False:
     roadmapItems = getDigdirRoadmap(authorizationToken)
     if args.save_binary == True:
-        with open('roadmap.pickle', 'wb') as handle:
+        with open('output/roadmap.pickle', 'wb') as handle:
             pickle.dump(roadmapItems, handle, protocol=pickle.HIGHEST_PROTOCOL)
 else:
-    with open('roadmap.pickle', 'rb') as handle:
+    with open('output/roadmap.pickle', 'rb') as handle:
         roadmapItems = pickle.load(handle)
 
 filename = args.file
 
 if args.type == "csv" or args.type == "all":
     attacement = generate_csv(roadmapItems)
-    with open(filename+".csv", "w") as stream:
+    with open(f"output/{filename}.csv", "w") as stream:
         attacement.seek(0)
         shutil.copyfileobj(attacement, stream)
 
 if args.type == "json" or args.type == "all":
-    with open(filename+"json", "w") as writer:
+    with open(f"output/{filename}.json", "w") as writer:
         writer.write(json.dumps(roadmapItems, cls=MyJSONEncoder))
 
 if args.type == "mail":
-    smtp_password = os.getenv("SMTP_PASSWORD")
-    smtp_account = os.getenv("SMTP_ACCOUNT")
+    password = os.getenv("SMTP_PASSWORD")
+    sender = os.getenv("SMTP_ACCOUNT")
 
-    subject = "Digdir roadmap report"
-    body = "Vedlagt ligger roadmap rapport"
-    sender = smtp_account
-    recipients = ["espen.korra@digdir.no"]
-    password = smtp_password
+    date = datetime.datetime.now()
+    formated_date = date.strftime("%d.%m.%Y")
+    week = date.strftime("%W")
+    subject = f"Digidir roadmap rapport uke {week}"
+    body = f"Vedlagt ligger roadmap rapport for uke {week}. Rapporten ble generert {formated_date}"
+
+    with open("mailreceipiens.txt", "r") as reader:
+        recipients = reader.read().splitlines()
 
     attacement = generate_csv(roadmapItems)
-    send_email(subject, body, sender, recipients, password, attacement)
+    filename = f"Roadmap rapport uke {week}"
+
+    send_email(subject, body, sender, recipients,
+               password, attacement, filename)
 
 if args.type == "screen" or args.type == "all":
     print(json.dumps(roadmapItems, cls=MyJSONEncoder))

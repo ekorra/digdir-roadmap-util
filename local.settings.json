@@ -3,6 +3,8 @@
   "Values": {
     "FUNCTIONS_WORKER_RUNTIME": "python",
     "AzureWebJobsStorage": "UseDevelopmentStorage=true",
-    "DIGIDIR_ROADMAP_TOKEN": ""
+    "DIGIDIR_ROADMAP_TOKEN": "",
+    "SMTP_PASSWORD": "",
+    "SMTP_ACCOUNT": ""
   }
 }
