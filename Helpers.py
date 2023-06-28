@@ -2,6 +2,7 @@ from email import encoders
 from email.mime.base import MIMEBase
 from email.mime.multipart import MIMEMultipart
 from email.mime.text import MIMEText
+from DigdirRoadmap import DigdirRoadmapItem
 import smtplib
 import io
 import csv
@@ -31,13 +32,13 @@ def send_email(subject: str, body, sender: str, recipients: list, password: str,
     print("Message sent!")
 
 
-def generate_csv(roadmapItems):
+def generate_csv(roadmapItems: DigdirRoadmapItem):
     csv_output = io.StringIO()
     csv_writer = csv.writer(csv_output)
     csv_writer.writerow(["Tittel", "Produkt", "Status", "Start",
-                        "End", "Progresjon (%)", "Storypoints", "Issues", "Closed"])
-    for p in roadmapItems:
-        csv_writer.writerow([p.title, p.product, p.status, p.start,
-                             p.end, p.progresjon, p.storypoints, p.numberOfTrackedIssues, p.numberOfSovedIssues])
+                        "End", "Progresjon (%)", "Storypoints", "Issues", "Closed", "URL"])
+    for roadmap_item in roadmapItems:
+        csv_writer.writerow([roadmap_item.title, roadmap_item.product, roadmap_item.status, roadmap_item.start,
+                             roadmap_item.end, roadmap_item.progresjon, roadmap_item.storypoints, roadmap_item.numberOfTrackedIssues, roadmap_item.numberOfSovedIssues, roadmap_item.url])
     csv_output.seek(0)
     return csv_output

@@ -79,6 +79,8 @@ class DigdirRoadmapItem:
             self.totalt_estimert = value
         elif key_lower == "labels":
             self.labels.append(value)
+        elif key_lower == "url":
+            self.url = value
         elif key_lower == "product":
             if "/" in value:
                 self.product = value.split("/")[1]
@@ -93,8 +95,6 @@ class DigdirRoadmapItem:
         closed = [x for x in trackedIssue["nodes"] if x['state'] == 'CLOSED']
         self.numberOfSovedIssues = len(closed)
 
-def getEspen():
-    return "Espen"
 
 def getDigdirRoadmap(authorizationToken):
     githubProjectNodes = getGithubProjectNodes(authorizationToken)
@@ -110,6 +110,9 @@ def getDigdirRoadmap(authorizationToken):
         if "trackedIssues" in node["content"]:
             if (node["content"]["trackedIssues"]["totalCount"] > 0):
                 roadmapItem.setTrackedIssues(node["content"]["trackedIssues"])
+
+        if "url" in node["content"]:
+            roadmapItem.set_value("url", node["content"]["url"])
 
         includeItem = True
         for n in node["fieldValues"]["nodes"]:
