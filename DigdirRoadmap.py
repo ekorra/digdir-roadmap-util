@@ -91,12 +91,11 @@ class DigdirRoadmapItem:
 
     def setTrackedIssues(self, trackedIssue):
         self.numberOfTrackedIssues = trackedIssue["totalCount"]
-        #stauses = trackedIssue["nodes"]
         closed = [x for x in trackedIssue["nodes"] if x['state'] == 'CLOSED']
         self.numberOfSovedIssues = len(closed)
 
 
-def getDigdirRoadmap(authorizationToken):
+def getDigdirRoadmap(authorizationToken: str, filter: list):
     githubProjectNodes = getGithubProjectNodes(authorizationToken)
 
     roadmapItems = []
@@ -114,14 +113,14 @@ def getDigdirRoadmap(authorizationToken):
         if "url" in node["content"]:
             roadmapItem.set_value("url", node["content"]["url"])
 
-        includeItem = True
+        includeItem = False
         for n in node["fieldValues"]["nodes"]:
             if n["__typename"] == "ProjectV2ItemFieldLabelValue":
                 labels = []
                 for nn in n["labels"]["nodes"]:
                     if "product/" in nn["name"]:
-                        # if nn["name"] == args.product:
-                        #    includeItem = True
+                        if nn["name"] in filter:
+                            includeItem = True
                         roadmapItem.set_value("product", nn["name"])
                     roadmapItem.set_value("labels", nn["name"])
                     labels.append(nn["name"])

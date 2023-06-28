@@ -23,8 +23,11 @@ args = parser.parse_args()
 
 authorizationToken = smtp_account = os.getenv("DIGIDIR_ROADMAP_TOKEN")
 
+with open("included_projects.txt", "r") as reader:
+    filter = reader.read().splitlines()
+
 if args.testrun == False:
-    roadmapItems = getDigdirRoadmap(authorizationToken)
+    roadmapItems = getDigdirRoadmap(authorizationToken, filter)
     if args.save_binary == True:
         with open('output/roadmap.pickle', 'wb') as handle:
             pickle.dump(roadmapItems, handle, protocol=pickle.HIGHEST_PROTOCOL)

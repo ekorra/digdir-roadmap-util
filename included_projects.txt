@@ -1,0 +1,8 @@
+product/autorisasjon
+product/fdk
+product/meldingstjenesten
+product/dan
+product/formidling
+product/studio
+product/dialogporten
+product/arbeidsflaten

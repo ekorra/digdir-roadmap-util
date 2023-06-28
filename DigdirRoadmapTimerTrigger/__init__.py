@@ -10,10 +10,6 @@ import azure.functions as func
 app = func.FunctionApp()
 
 
-@app.function_name(name="mytimer")
-@app.schedule(schedule="*/5 * * * *",
-              arg_name="mytimer",
-              run_on_startup=True)
 def main(mytimer: func.TimerRequest) -> None:
     utc_timestamp = datetime.datetime.utcnow().replace(
         tzinfo=datetime.timezone.utc).isoformat()
@@ -28,7 +24,10 @@ def main(mytimer: func.TimerRequest) -> None:
     if (token == None):
         logging.CRITICAL("Missing smtp account")
 
-    roadmapItems = getDigdirRoadmap(token)
+    with open("included_projects.txt", "r") as reader:
+        filter = reader.read().splitlines()
+
+    roadmapItems = getDigdirRoadmap(token, filter)
 
     date = datetime.datetime.now()
     formated_date = date.strftime("%d.%m.%Y")
