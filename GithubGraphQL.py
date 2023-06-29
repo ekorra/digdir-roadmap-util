@@ -7,7 +7,7 @@ def getGithubProjectNodes(authorizationToken):
     transport = AIOHTTPTransport(url="https://api.github.com/graphql", headers={
         'Authorization': authorizationToken})
     # Create a GraphQL client using the defined transport
-    client = Client(transport=transport, fetch_schema_from_transport=True)
+    client = Client(transport=transport, fetch_schema_from_transport=False)
 
     hasNextPage = True
     params = {"after": ""}
