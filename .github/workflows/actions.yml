@@ -43,7 +43,7 @@ jobs:
       with:
         repo_token: ${{ secrets.GITHUB_TOKEN }}
         file: output/roadmap_report.csv
-        release_name: Digdir roadmap report ${{ steps.date.outputs.date }}
-        asset_name: roadmap_report-${{ steps.date.outputs.date }}.csv
+        release_name: Digdir roadmap report ${{ github.event.repository.updated_at}}
+        asset_name: roadmap_report-${{ github.event.repository.updated_at}}.csv
         overwrite: false
         body: "This is my release text"
