@@ -28,22 +28,36 @@ jobs:
           # SMTP_ACCOUNT: ${{ secrets.SMTP_ACCOUNT }}
           # SMTP_PASSWORD: ${{ secrets.SMTP_PASSWORD }}
         run: python GithubRelease.py
-  release:
-    runs-on: ubuntu-latest
-    needs: [build]
-    steps:
-    - uses: actions/checkout@master
-    
-    - name: set date
-      id: date
-      run: echo "::set-output name=date::$(date +'%Y-%m-%d')"
 
-    - name: Create release
-      uses: svenstaro/upload-release-action@v2
-      with:
-        repo_token: ${{ secrets.GITHUB_TOKEN }}
-        file: output/roadmap_report.csv
-        release_name: Digdir roadmap report ${{ steps.date.outputs.date }}
-        asset_name: roadmap_report-${{ steps.date.outputs.date }}.csv
-        overwrite: false
-        body: "This is my release text"
+      - name: set date
+        id: date
+        run: echo "::set-output name=date::$(date +'%Y-%m-%d')"
+
+      - name: Create release
+        uses: svenstaro/upload-release-action@v2
+        with:
+          repo_token: ${{ secrets.GITHUB_TOKEN }}
+          file: output/roadmap_report.csv
+          release_name: Digdir roadmap report ${{ steps.date.outputs.date }}
+          asset_name: roadmap_report-${{ steps.date.outputs.date }}.csv
+          overwrite: false
+          body: "This is my release text"
+  # release:
+  #   runs-on: ubuntu-latest
+  #   needs: [build]
+  #   steps:
+  #   - uses: actions/checkout@master
+    
+  #   - name: set date
+  #     id: date
+  #     run: echo "::set-output name=date::$(date +'%Y-%m-%d')"
+
+  #   - name: Create release
+  #     uses: svenstaro/upload-release-action@v2
+  #     with:
+  #       repo_token: ${{ secrets.GITHUB_TOKEN }}
+  #       file: output/roadmap_report.csv
+  #       release_name: Digdir roadmap report ${{ steps.date.outputs.date }}
+  #       asset_name: roadmap_report-${{ steps.date.outputs.date }}.csv
+  #       overwrite: false
+  #       body: "This is my release text"
