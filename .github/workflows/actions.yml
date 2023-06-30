@@ -34,7 +34,7 @@ jobs:
         run: echo "::set-output name=date::$(date +'%Y-%m-%d')"
 
       - name: Crate release
-        run: gh release create --notes "Digdir roadmap report $(date +'%Y-%m-%d')" 'output/roadmap_report.csv'
+        run: gh release create --notes "Digdir roadmap report $(date +'%Y-%m-%d')" output/roadmap_report.csv
         env:
           GH_TOKEN: ${{ secrets.RELEASE_TOKEN }}
 
