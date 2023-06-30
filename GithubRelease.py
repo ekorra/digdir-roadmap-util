@@ -38,7 +38,9 @@ def main() -> any:
 
     roadmap_issues = getDigdirRoadmap(roadmap_token, filter)
     csvfile = generate_csv(roadmap_issues)
-    with open(f"output/roadmap_report.csv", "w") as stream:
+    filename = "output/roadmap_report.csv"
+    os.makedirs(os.path.dirname(filename), exist_ok=True)
+    with open(filename, "w") as stream:
         csvfile.seek(0)
         shutil.copyfileobj(csvfile, stream)
 
