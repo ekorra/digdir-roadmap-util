@@ -36,7 +36,7 @@ jobs:
       - name: Crate release
         run: gh release create --notes "Digdir roadmap report $(date +'%Y-%m-%d')" 'output/roadmap_report.csv'
         env:
-          GH_TOKEN: ${{ secrets.DIGIDIR_ROADMAP_TOKEN }}
+          GH_TOKEN: ${{ secrets.RELEASE_TOKEN }}
 
       # - name: Create release
       #   uses: svenstaro/upload-release-action@v2
