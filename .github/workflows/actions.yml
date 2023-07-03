@@ -7,7 +7,7 @@ on:
 
 jobs:
   build:
-    runs-on: macos-latest
+    runs-on: ubuntu-latest
     steps:
       - name: checkout repo content
         uses: actions/checkout@v2 # checkout the repository content
@@ -29,40 +29,7 @@ jobs:
           # SMTP_PASSWORD: ${{ secrets.SMTP_PASSWORD }}
         run: python GithubRelease.py
 
-      - name: set date
-        id: date
-        run: echo "::set-output name=date::$(date +'%Y-%m-%d')"
-
       - name: Crate release
-        run: gh release create --notes "Digdir roadmap report $(date +'%Y-%m-%d')" output/roadmap_report.csv
+        run: gh release create "RoadmapReport_Uke_$(date +'%U')" "output/roadmap_report.csv" --notes "Digdir roadmap report for uke $(date +'%V')<br>Rapport generert $(date +'%d.%m.%Y %R')"
         env:
           GH_TOKEN: ${{ secrets.RELEASE_TOKEN }}
-
-      # - name: Create release
-      #   uses: svenstaro/upload-release-action@v2
-      #   with:
-      #     repo_token: ${{ secrets.GITHUB_TOKEN }}
-      #     file: output/roadmap_report.csv
-      #     release_name: Digdir roadmap report ${{ steps.date.outputs.date }}
-      #     asset_name: roadmap_report-${{ steps.date.outputs.date }}.csv
-      #     overwrite: false
-      #     body: "This is my release text"
-  # release:
-  #   runs-on: ubuntu-latest
-  #   needs: [build]
-  #   steps:
-  #   - uses: actions/checkout@master
-    
-  #   - name: set date
-  #     id: date
-  #     run: echo "::set-output name=date::$(date +'%Y-%m-%d')"
-
-  #   - name: Create release
-  #     uses: svenstaro/upload-release-action@v2
-  #     with:
-  #       repo_token: ${{ secrets.GITHUB_TOKEN }}
-  #       file: output/roadmap_report.csv
-  #       release_name: Digdir roadmap report ${{ steps.date.outputs.date }}
-  #       asset_name: roadmap_report-${{ steps.date.outputs.date }}.csv
-  #       overwrite: false
-  #       body: "This is my release text"
