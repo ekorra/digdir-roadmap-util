@@ -30,6 +30,6 @@ jobs:
         run: python GithubRelease.py
 
       - name: Crate release
-        run: gh release create "RoadmapReport_Uke_$(date +'%U')" "output/roadmap_report.csv" --notes "Digdir roadmap report for uke $(date +'%V')<br>Rapport generert $(date +'%d.%m.%Y %R')"
+        run: gh release create "$(date +'%U')" "output/roadmap_report.csv" --notes "Digdir roadmap rapport for uke $(date +'%V')<br>Rapport generert $(date +'%d.%m.%Y %R')" -t "Roadmap rapport Uke $(date +'%U')"
         env:
           GH_TOKEN: ${{ secrets.RELEASE_TOKEN }}
