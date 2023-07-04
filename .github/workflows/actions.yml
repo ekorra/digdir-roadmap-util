@@ -3,10 +3,10 @@ name: run Roadmap report generator
 on:
   workflow_dispatch:
   schedule:
-    - cron: '0 0 * * 1' # At 00:00 on Monday
+    - cron: '0 12 * * 1' # At 12:00 on Monday
 
 jobs:
-  build:
+  release:
     runs-on: ubuntu-latest
     steps:
       - name: checkout repo content
