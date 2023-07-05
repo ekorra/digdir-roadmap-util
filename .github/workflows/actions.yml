@@ -1,4 +1,4 @@
-name: run Roadmap report generator
+name: Roadmap report generator
 
 on:
   workflow_dispatch:
@@ -33,3 +33,7 @@ jobs:
         run: gh release create "$(date +'%U')" "output/roadmap_report.csv" --notes "Digdir roadmap rapport for uke $(date +'%V')<br>Rapport generert $(date +'%d.%m.%Y %R')" -t "Roadmap rapport Uke $(date +'%U')"
         env:
           GH_TOKEN: ${{ secrets.RELEASE_TOKEN }}
+
+      - name: Notify
+        run: python mail_notifier.py
+
