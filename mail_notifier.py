@@ -46,11 +46,12 @@ def main() -> None:
     subject = f"Digidir roadmap rapport uke {week}"
     body = f"{release_name}<br>Rapport for uke {week} kan lastes ned ved å trykke <a href={report_link}>her</a><br>Eventult kan du gå <a href={release_link}>hit</a> og laste den ned"
 
-    password = os.getenv("SMTP_PASSWORD")
-    sender = os.getenv("SMTP_ACCOUNT")
+    password = os.environ("SMTP_PASSWORD")
+    sender = os.environ("SMTP_ACCOUNT")
 
     if not password or not sender:
         print("sender: "+sender)
+        print("pwd: " + len(password))
         raise Exception("SMTP_PASSWORD of SMTP_ACCOUNT missing")
 
     send_email(subject, body, sender, reciepients, password)
