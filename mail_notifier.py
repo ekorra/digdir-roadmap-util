@@ -51,6 +51,7 @@ def main() -> None:
 
     if not password or not sender:
         print("sender: "+sender)
+        print("pwd: " + len(password))
         raise Exception("SMTP_PASSWORD of SMTP_ACCOUNT missing")
 
     send_email(subject, body, sender, reciepients, password)
