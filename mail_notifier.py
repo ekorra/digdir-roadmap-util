@@ -29,7 +29,7 @@ def main() -> None:
         shold_send_mail = config["send_notification_mail"]
         release_url = config["latest_release_url"]
 
-    if (shold_send_mail is None or reciepients is None or release_url is None):
+    if shold_send_mail is None or reciepients is None or release_url is None:
         return
 
     response = requests.get(release_url)

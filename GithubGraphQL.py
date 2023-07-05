@@ -19,7 +19,7 @@ def getGithubProjectNodes(authorizationToken):
         nodes = nodes + nodesToAdd
 
         hasNextPage = result["organization"]["projectV2"]["items"]["pageInfo"]["hasNextPage"]
-        if hasNextPage == True:
+        if hasNextPage:
             params["after"] = result["organization"]["projectV2"]["items"]["pageInfo"]["endCursor"]
 
     return nodes

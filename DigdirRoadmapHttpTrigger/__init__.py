@@ -1,7 +1,7 @@
 import logging
 import os
 import json
-from DigdirRoadmap import *
+from DigdirRoadmap import getDigdirRoadmap, MyJSONEncoder
 
 import azure.functions as func
 
@@ -10,7 +10,7 @@ def main(req: func.HttpRequest) -> func.HttpResponse:
     logging.info('Python HTTP trigger function processed a request.')
 
     token = os.getenv("DIGIDIR_ROADMAP_TOKEN")
-    if (token == None):
+    if (token is None):
         logging.CRITICAL("Missing authorization token")
         return func.HttpResponse("Something went wrong", status_code=500)
 

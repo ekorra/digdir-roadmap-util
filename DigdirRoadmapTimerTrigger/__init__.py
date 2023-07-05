@@ -1,8 +1,8 @@
 import datetime
 import logging
 import os
-from DigdirRoadmap import *
-from Helpers import *
+from DigdirRoadmap import getDigdirRoadmap
+from Helpers import send_email, generate_csv
 
 import azure.functions as func
 
@@ -15,13 +15,13 @@ def main(mytimer: func.TimerRequest) -> None:
         tzinfo=datetime.timezone.utc).isoformat()
 
     token = os.getenv("DIGIDIR_ROADMAP_TOKEN")
-    if (token == None):
+    if (token is None):
         logging.CRITICAL("Missing authorization token")
     password = os.getenv("SMTP_PASSWORD")
-    if (token == None):
+    if (token is None):
         logging.CRITICAL("Missing smtp password")
     sender = os.getenv("SMTP_ACCOUNT")
-    if (token == None):
+    if (token is None):
         logging.CRITICAL("Missing smtp account")
 
     with open("included_projects.txt", "r") as reader:

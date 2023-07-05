@@ -3,8 +3,8 @@ import logging.handlers
 import os
 import shutil
 import datetime
-from Helpers import *
-from DigdirRoadmap import *
+from Helpers import generate_csv
+from DigdirRoadmap import getDigdirRoadmap
 
 logger = logging.getLogger(__name__)
 logger.setLevel(logging.DEBUG)

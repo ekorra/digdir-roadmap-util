@@ -1,4 +1,4 @@
-from GithubGraphQL import *
+from GithubGraphQL import getGithubProjectNodes
 from json import JSONEncoder
 import json
 
@@ -136,7 +136,7 @@ def getDigdirRoadmap(authorizationToken: str, filter: list):
                 roadmapItem.set_value(
                     n["field"]["name"], n["milestone"]["title"])
 
-        if (includeItem == True):
+        if (includeItem):
             roadmapItems.append(roadmapItem)
 
         includeItem = True
