@@ -24,9 +24,7 @@ jobs:
 
       - name: generate report file # run GithubRelease.py
         env:
-          DIGIDIR_ROADMAP_TOKEN: ${{ secrets.DIGIDIR_ROADMAP_TOKEN }}
-          # SMTP_ACCOUNT: ${{ secrets.SMTP_ACCOUNT }}
-          # SMTP_PASSWORD: ${{ secrets.SMTP_PASSWORD }}
+          DIGIDIR_ROADMAP_TOKEN: ${{ secrets.DIGIDIR_ROADMAP_TOKEN }}          
         run: python GithubRelease.py
 
       - name: Crate release
@@ -35,5 +33,8 @@ jobs:
           GH_TOKEN: ${{ secrets.RELEASE_TOKEN }}
 
       - name: Notify
+        env:          
+          SMTP_ACCOUNT: ${{ secrets.SMTP_ACCOUNT }}
+          SMTP_PASSWORD: ${{ secrets.SMTP_PASSWORD }}
         run: python mail_notifier.py
 
