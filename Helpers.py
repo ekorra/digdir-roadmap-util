@@ -42,7 +42,7 @@ def generate_csv(roadmapItems: DigdirRoadmapItem):
                          "Start",
                          "End",
                          "Progresjon (%)",
-                         "Storypoints",
+                         "Estimerte ukesverk",
                          "Issues",
                          "Closed",
                          "URL"])
@@ -54,7 +54,7 @@ def generate_csv(roadmapItems: DigdirRoadmapItem):
                             roadmap_item.start,
                             roadmap_item.end,
                             roadmap_item.progresjon,
-                            roadmap_item.storypoints,
+                            roadmap_item.estimerte_ukesverk,
                             roadmap_item.numberOfTrackedIssues,
                             roadmap_item.numberOfSovedIssues,
                             roadmap_item.url])

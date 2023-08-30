@@ -34,12 +34,11 @@ class DigdirRoadmapItem:
         self.start = None
         self.end = None
         self.status = None
-        self.storypoints = None
         self.progresjon = None
-        self.totalt_estimert = None
         self.numberOfTrackedIssues = 0
         self.numberOfSovedIssues = 0
         self.state = None
+        self.estimerte_ukesverk = None
         self.labels = []
 
     def __str__(self):
@@ -55,12 +54,11 @@ class DigdirRoadmapItem:
             "start": self.start,
             "end": self.end,
             "status": self.status,
-            "storypoints":  self.storypoints,
             "progretion": self.progresjon,
-            "estimated_total": self.totalt_estimert,
             "state": self.state,
             "tracked": self.numberOfTrackedIssues,
             "solved": self.numberOfSovedIssues,
+            "estimated_work": self.estimerte_ukesverk,
             "labels": self.labels
         }.items()
 
@@ -82,12 +80,8 @@ class DigdirRoadmapItem:
             self.end = value
         elif key_lower == "status":
             self.status = value
-        elif key_lower == "storypoints":
-            self.storypoints = value
         elif key_lower == "progresjon (%)":
             self.progresjon = value
-        elif key_lower == "totalt estimert":
-            self.totalt_estimert = value
         elif key_lower == "labels":
             self.labels.append(value)
         elif key_lower == "url":
@@ -99,6 +93,8 @@ class DigdirRoadmapItem:
                 self.product == value
         elif key_lower == "state":
             self.state = value
+        elif key_lower == "estimerte ukesverk":
+            self.estimerte_ukesverk = value
 
     def setTrackedIssues(self, trackedIssue):
         self.numberOfTrackedIssues = trackedIssue["totalCount"]
@@ -115,17 +111,17 @@ class DigdirRoadmapItem:
 
 def getDigdirRoadmap(authorizationToken: str, filter: list):
     # TODO: use settings to enable this
-    # if (os.path.isfile('sample.json')):
-    #     with open('sample.json', 'r') as openfile:
-    #         githubProjectNodes = json.load(openfile)
+    if (os.path.isfile('sample.json')):
+        with open('sample.json', 'r') as openfile:
+            githubProjectNodes = json.load(openfile)
 
-    # else:
-    #     githubProjectNodes = getGithubProjectNodes(authorizationToken)
-    #     githubProjectNodes_json = json.dumps(githubProjectNodes)
-    #     with open("sample.json", "w") as outfile:
-    #         outfile.write(githubProjectNodes_json)
+    else:
+        githubProjectNodes = getGithubProjectNodes(authorizationToken)
+        githubProjectNodes_json = json.dumps(githubProjectNodes)
+        with open("sample.json", "w") as outfile:
+            outfile.write(githubProjectNodes_json)
 
-    githubProjectNodes = getGithubProjectNodes(authorizationToken)
+    # githubProjectNodes = getGithubProjectNodes(authorizationToken)
 
     roadmapItems = []
     for node in githubProjectNodes:
