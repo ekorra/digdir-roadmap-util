@@ -91,8 +91,15 @@ class DigdirRoadmapItem:
 
     def setTrackedIssues(self, trackedIssue):
         self.numberOfTrackedIssues = trackedIssue["totalCount"]
-        closed = [x for x in trackedIssue["nodes"] if x['state'] == 'CLOSED']
-        self.numberOfSovedIssues = len(closed)
+
+        closed = 0
+        for x in trackedIssue["nodes"]:
+            if x is None:
+                pass
+            elif x['state'] == 'CLOSED':
+                closed += 1
+
+        self.numberOfSovedIssues = closed
 
 
 def getDigdirRoadmap(authorizationToken: str, filter: list):
