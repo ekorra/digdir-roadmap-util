@@ -36,7 +36,8 @@ def generate_csv(roadmapItems: DigdirRoadmapItem):
     csv_output = io.StringIO()
     csv_writer = csv.writer(csv_output)
     csv_writer.writerow(["Tittel",
-                        "Produkt",
+                        "Overordnet beskrivelse",
+                         "Produkt",
                          "Status",
                          "Start",
                          "End",
@@ -47,6 +48,7 @@ def generate_csv(roadmapItems: DigdirRoadmapItem):
                          "URL"])
     for roadmap_item in roadmapItems:
         csv_writer.writerow([roadmap_item.title,
+                            roadmap_item.task_summary,
                             roadmap_item.product,
                             roadmap_item.status,
                             roadmap_item.start,

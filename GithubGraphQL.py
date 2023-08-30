@@ -7,7 +7,8 @@ def getGithubProjectNodes(authorizationToken):
     transport = AIOHTTPTransport(url="https://api.github.com/graphql", headers={
         'Authorization': authorizationToken})
     # Create a GraphQL client using the defined transport
-    client = Client(transport=transport, fetch_schema_from_transport=False)
+    client = Client(transport=transport,
+                    fetch_schema_from_transport=False, execute_timeout=30)
 
     hasNextPage = True
     params = {"after": ""}
@@ -51,8 +52,9 @@ def getQuery():
                     id
                     content {
                         ... on Issue {
-                        title 
-                        number 
+                        title
+                        bodyHTML
+                        number
                         url
                         state
                         trackedIssues(first:50){

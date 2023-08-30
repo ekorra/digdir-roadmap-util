@@ -1,6 +1,13 @@
 from GithubGraphQL import getGithubProjectNodes
 from json import JSONEncoder
 import json
+import re
+import os.path
+
+# regex pattern will match header tags with following paragraph tags from Github project item
+MAIN_SECTIONS_REGEX_PATTERN = '<(h\d) dir=\\"auto\\">(.*?)<\/(h\d)>(\n|\\n)*(<p dir=\\"auto\\">(.*?)<\/p>)*'
+# regex pattern will match paragraph from Github project item
+DISCRIPTION_REGEX_PATTERN = '(<p dir="auto">(.*?)<\/p>)'
 
 
 class MyJSONEncoder(JSONEncoder):
@@ -20,6 +27,7 @@ def default(obj):
 class DigdirRoadmapItem:
     def __init__(self, title, number, url, state=None):
         self.title = title
+        self.task_summary = None
         self.number = number
         self.product = None
         self.url = url
@@ -40,6 +48,7 @@ class DigdirRoadmapItem:
     def __iter__(self):
         yield from {
             "title": self.title,
+            "task_summary": self.task_summary,
             "product": self.product,
             "number":  self.number,
             "url":  self.url,
@@ -65,6 +74,8 @@ class DigdirRoadmapItem:
         key_lower = key.lower()
         if key_lower == "title":
             self.title = value
+        elif key_lower == "task_summary":
+            self.task_summary = value
         elif key_lower == "start":
             self.start = value
         elif key_lower == "end":
@@ -103,6 +114,17 @@ class DigdirRoadmapItem:
 
 
 def getDigdirRoadmap(authorizationToken: str, filter: list):
+    # TODO: use settings to enable this
+    # if (os.path.isfile('sample.json')):
+    #     with open('sample.json', 'r') as openfile:
+    #         githubProjectNodes = json.load(openfile)
+
+    # else:
+    #     githubProjectNodes = getGithubProjectNodes(authorizationToken)
+    #     githubProjectNodes_json = json.dumps(githubProjectNodes)
+    #     with open("sample.json", "w") as outfile:
+    #         outfile.write(githubProjectNodes_json)
+
     githubProjectNodes = getGithubProjectNodes(authorizationToken)
 
     roadmapItems = []
@@ -116,6 +138,10 @@ def getDigdirRoadmap(authorizationToken: str, filter: list):
         if "trackedIssues" in node["content"]:
             if (node["content"]["trackedIssues"]["totalCount"] > 0):
                 roadmapItem.setTrackedIssues(node["content"]["trackedIssues"])
+
+        if "bodyHTML" in node["content"]:
+            roadmapItem.task_summary = get_text_from_bodyHtml(
+                node["content"]["bodyHTML"], 'Overordnet beskrivelse')
 
         if "url" in node["content"]:
             roadmapItem.set_value("url", node["content"]["url"])
@@ -149,3 +175,16 @@ def getDigdirRoadmap(authorizationToken: str, filter: list):
         includeItem = True
 
     return roadmapItems
+
+
+def get_text_from_bodyHtml(html: str, section_header: str):
+
+    main_section = re.compile(MAIN_SECTIONS_REGEX_PATTERN)
+    main_section_matches = main_section.findall(html)
+
+    for header_with_description_group in main_section_matches:
+        if header_with_description_group[1] == section_header:
+            for group_item in header_with_description_group:
+                discription = re.findall(DISCRIPTION_REGEX_PATTERN, group_item)
+                if discription:
+                    return discription[0][1]
