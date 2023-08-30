@@ -3,7 +3,7 @@ name: Roadmap report generator
 on:
   workflow_dispatch:
   schedule:
-    - cron: '0 12 * * 1' # At 12:00 on Monday
+    - cron: '0 16 * * 1' # At 16:00 on Monday
 
 jobs:
   release:
