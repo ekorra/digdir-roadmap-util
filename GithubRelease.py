@@ -3,6 +3,7 @@ import logging.handlers
 import os
 import shutil
 import datetime
+import yaml
 from Helpers import generate_csv
 from DigdirRoadmap import getDigdirRoadmap
 
@@ -33,12 +34,14 @@ week = date.strftime("%W")
 
 
 def main() -> any:
-    with open("included_projects.txt", "r") as reader:
-        filter = reader.read().splitlines()
+    with open("config.yml", "r") as config_objct:
+        config = yaml.load(config_objct, Loader=yaml.SafeLoader)
+        filter = config["projects"]
 
     roadmap_issues = getDigdirRoadmap(roadmap_token, filter)
     csvfile = generate_csv(roadmap_issues)
-    filename = "output/roadmap_report.csv"
+    reportname = config["report_name"]
+    filename = f'output/{reportname}.csv'
     os.makedirs(os.path.dirname(filename), exist_ok=True)
     with open(filename, "w") as stream:
         csvfile.seek(0)

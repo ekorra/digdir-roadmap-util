@@ -1,5 +1,6 @@
 from GithubGraphQL import getGithubProjectNodes
 from json import JSONEncoder
+from datetime import datetime
 import json
 import re
 import os.path
@@ -109,19 +110,20 @@ class DigdirRoadmapItem:
         self.numberOfSovedIssues = closed
 
 
-def getDigdirRoadmap(authorizationToken: str, filter: list):
-    # TODO: use settings to enable this
-    if (os.path.isfile('sample.json')):
-        with open('sample.json', 'r') as openfile:
-            githubProjectNodes = json.load(openfile)
+def getDigdirRoadmap(authorizationToken: str, filter: list, save_github_response=False):
+    if (save_github_response):
+        filename = f'githubresponse_{datetime.now().strftime("%d%m%y")}'
+        if (os.path.isfile(f'output/{filename}')):
 
+            with open(f'output/{filename}', 'r') as openfile:
+                githubProjectNodes = json.load(openfile)
+        else:
+            githubProjectNodes = getGithubProjectNodes(authorizationToken)
+            githubProjectNodes_json = json.dumps(githubProjectNodes)
+            with open(f'output/{filename}', "w") as outfile:
+                outfile.write(githubProjectNodes_json)
     else:
         githubProjectNodes = getGithubProjectNodes(authorizationToken)
-        githubProjectNodes_json = json.dumps(githubProjectNodes)
-        with open("sample.json", "w") as outfile:
-            outfile.write(githubProjectNodes_json)
-
-    # githubProjectNodes = getGithubProjectNodes(authorizationToken)
 
     roadmapItems = []
     for node in githubProjectNodes:

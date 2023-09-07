@@ -7,14 +7,12 @@ import os
 import pickle
 import shutil
 import datetime
+import yaml
 
 
 parser = argparse.ArgumentParser()
-parser.add_argument("--file", default="roadmap", type=str,
-                    help="filename of generated file")
 parser.add_argument("--type", default="screen",
                     choices=["json", "csv", "mail", "screen", "all"], help="json|csv|mail|screen|all")
-parser.add_argument("--product", help="name of product in roadmap")
 parser.add_argument("--save_binary", action=argparse.BooleanOptionalAction)
 parser.add_argument("--testrun", action=argparse.BooleanOptionalAction)
 parser.set_defaults(testrun=False)
@@ -23,11 +21,14 @@ args = parser.parse_args()
 
 authorizationToken = smtp_account = os.getenv("DIGIDIR_ROADMAP_TOKEN")
 
-with open("included_projects.txt", "r") as reader:
-    filter = reader.read().splitlines()
+
+with open("config_test.yml", "r") as config_objct:
+    config = yaml.load(config_objct, Loader=yaml.SafeLoader)
+    filter = config["projects"]
+    devmode = config["devlop_mode"]
 
 if args.testrun == False:
-    roadmapItems = getDigdirRoadmap(authorizationToken, filter)
+    roadmapItems = getDigdirRoadmap(authorizationToken, filter, devmode)
     if args.save_binary == True:
         with open('output/roadmap.pickle', 'wb') as handle:
             pickle.dump(roadmapItems, handle, protocol=pickle.HIGHEST_PROTOCOL)
@@ -35,7 +36,7 @@ else:
     with open('output/roadmap.pickle', 'rb') as handle:
         roadmapItems = pickle.load(handle)
 
-filename = args.file
+filename = config["report_name"]
 
 if args.type == "csv" or args.type == "all":
     attacement = generate_csv(roadmapItems)
@@ -56,9 +57,7 @@ if args.type == "mail":
     week = date.strftime("%W")
     subject = f"Digidir roadmap rapport uke {week}"
     body = f"Vedlagt ligger roadmap rapport for uke {week}. Rapporten ble generert {formated_date}"
-
-    with open("mailreceipiens.txt", "r") as reader:
-        recipients = reader.read().splitlines()
+    recipients = config['mail']['mail_receipients']
 
     attacement = generate_csv(roadmapItems)
     filename = f"Roadmap rapport uke {week}"

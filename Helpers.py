@@ -45,8 +45,10 @@ def generate_csv(roadmapItems: DigdirRoadmapItem):
                          "Estimerte ukesverk",
                          "Issues",
                          "Closed",
-                         "URL"])
+                         "URL",
+                         "Nye altinn"])
     for roadmap_item in roadmapItems:
+        has_nye_altinn = 'program/nye-altinn' in roadmap_item.labels
         csv_writer.writerow([roadmap_item.title,
                             roadmap_item.task_summary,
                             roadmap_item.product,
@@ -57,6 +59,7 @@ def generate_csv(roadmapItems: DigdirRoadmapItem):
                             roadmap_item.estimerte_ukesverk,
                             roadmap_item.numberOfTrackedIssues,
                             roadmap_item.numberOfSovedIssues,
-                            roadmap_item.url])
+                            roadmap_item.url,
+                            has_nye_altinn])
     csv_output.seek(0)
     return csv_output

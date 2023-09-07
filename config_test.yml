@@ -4,24 +4,13 @@ mail:
             - espen.korra@digdir.no
 
 projects: 
-      - product/autorisasjon,
-      - product/fdk
-      - product/meldingstjenesten
-      - product/dan
-      - product/formidling
-      - product/studio
-      - product/dialogporten
-      - product/arbeidsflaten
+      - product/autorisasjon
       - product/varsling
       - product/dialogporten.js
 
-report_name: roadmap_report
+report_name: roadmap_report_test
 
 latest_release_url: 'https://api.github.com/repos/ekorra/digdir-roadmap-util/releases/latest'
 
-devlop_mode: False
-
-
-
-
+devlop_mode: True
 

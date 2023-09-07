@@ -1,6 +1,7 @@
 import logging
 import os
 import json
+import yaml
 from DigdirRoadmap import getDigdirRoadmap, MyJSONEncoder
 
 import azure.functions as func
@@ -14,8 +15,9 @@ def main(req: func.HttpRequest) -> func.HttpResponse:
         logging.CRITICAL("Missing authorization token")
         return func.HttpResponse("Something went wrong", status_code=500)
 
-    with open("included_projects.txt", "r") as reader:
-        filter = reader.read().splitlines()
+    with open("config.yml", "r") as config_objct:
+        config = yaml.load(config_objct, Loader=yaml.SafeLoader)
+        filter = config["projects"]
 
     roadmapItems = getDigdirRoadmap(token, filter)
     numberOfRoadmapItems = len(roadmapItems)

@@ -1,6 +1,7 @@
 import datetime
 import logging
 import os
+import yaml
 from DigdirRoadmap import getDigdirRoadmap
 from Helpers import send_email, generate_csv
 
@@ -24,8 +25,9 @@ def main(mytimer: func.TimerRequest) -> None:
     if (token is None):
         logging.CRITICAL("Missing smtp account")
 
-    with open("included_projects.txt", "r") as reader:
-        filter = reader.read().splitlines()
+    with open("config_test.yml", "r") as config_objct:
+        config = yaml.load(config_objct, Loader=yaml.SafeLoader)
+        filter = config["projects"]
 
     roadmapItems = getDigdirRoadmap(token, filter)
 
@@ -34,6 +36,11 @@ def main(mytimer: func.TimerRequest) -> None:
     week = date.strftime("%W")
     subject = f"Digidir roadmap rapport uke {week}"
     body = f"Vedlagt ligger roadmap rapport for uke {week}. Rapporten ble generert {formated_date}"
+
+    with open("config.yml", "r") as config_objct:
+        config = yaml.load(config_objct, Loader=yaml.SafeLoader)
+        recipients = config['mail']['mail_receipients']
+        print(recipients)
 
     with open("mailreceipiens.txt", "r") as reader:
         recipients = reader.read().splitlines()
