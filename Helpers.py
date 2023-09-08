@@ -43,7 +43,7 @@ def generate_csv(roadmapItems: DigdirRoadmapItem):
                          "End",
                          "Progresjon (%)",
                          "Estimerte ukesverk",
-                         "Issues",
+                         "Tasks",
                          "Closed",
                          "URL",
                          "Nye altinn"])
