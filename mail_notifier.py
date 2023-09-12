@@ -25,7 +25,7 @@ def main() -> None:
         config = yaml.safe_load(stream)
 
     if config is not None:
-        reciepients = config["mail_receipients"]
+        reciepients = config['mail']["mail_receipients"]
         shold_send_mail = config["send_notification_mail"]
         release_url = config["latest_release_url"]
 

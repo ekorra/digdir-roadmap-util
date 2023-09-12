@@ -42,9 +42,6 @@ def main(mytimer: func.TimerRequest) -> None:
         recipients = config['mail']['mail_receipients']
         print(recipients)
 
-    with open("mailreceipiens.txt", "r") as reader:
-        recipients = reader.read().splitlines()
-
     attacement = generate_csv(roadmapItems)
     filename = f"Roadmap rapport uke {week}"
 
