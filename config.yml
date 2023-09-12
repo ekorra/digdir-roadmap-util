@@ -4,7 +4,7 @@ mail:
             - espen.korra@digdir.no
 
 projects: 
-      - product/autorisasjon,
+      - product/autorisasjon
       - product/fdk
       - product/meldingstjenesten
       - product/dan
