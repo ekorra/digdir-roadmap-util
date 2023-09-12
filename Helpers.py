@@ -45,6 +45,7 @@ def generate_csv(roadmapItems: DigdirRoadmapItem):
                          "Estimerte ukesverk",
                          "Tasks",
                          "Closed",
+                         "Avhengigheter",
                          "URL",
                          "Nye altinn"])
     for roadmap_item in roadmapItems:
@@ -59,6 +60,7 @@ def generate_csv(roadmapItems: DigdirRoadmapItem):
                             roadmap_item.estimerte_ukesverk,
                             roadmap_item.numberOfTrackedIssues,
                             roadmap_item.numberOfSovedIssues,
+                            roadmap_item.dependencies,
                             roadmap_item.url,
                             has_nye_altinn])
     csv_output.seek(0)

@@ -1,14 +1,9 @@
 from GithubGraphQL import getGithubProjectNodes
 from json import JSONEncoder
 from datetime import datetime
+from bs4 import BeautifulSoup
 import json
-import re
 import os.path
-
-# regex pattern will match header tags with following paragraph tags from Github project item
-MAIN_SECTIONS_REGEX_PATTERN = '<(h\d) dir=\\"auto\\">(.*?)<\/(h\d)>(\n|\\n)*(<p dir=\\"auto\\">(.*?)<\/p>)*'
-# regex pattern will match paragraph from Github project item
-DISCRIPTION_REGEX_PATTERN = '(<p dir="auto">(.*?)<\/p>)'
 
 
 class MyJSONEncoder(JSONEncoder):
@@ -40,6 +35,8 @@ class DigdirRoadmapItem:
         self.numberOfSovedIssues = 0
         self.state = None
         self.estimerte_ukesverk = None
+        self.body_html = None
+        self.dependencies = None
         self.labels = []
 
     def __str__(self):
@@ -60,6 +57,7 @@ class DigdirRoadmapItem:
             "tracked": self.numberOfTrackedIssues,
             "solved": self.numberOfSovedIssues,
             "estimated_work": self.estimerte_ukesverk,
+            "dependencies": self.dependencies,
             "labels": self.labels
         }.items()
 
@@ -126,63 +124,116 @@ def getDigdirRoadmap(authorizationToken: str, filter: list, save_github_response
         githubProjectNodes = getGithubProjectNodes(authorizationToken)
 
     roadmapItems = []
-    for node in githubProjectNodes:
-        roadmapItem = DigdirRoadmapItem(
-            node["content"]["title"], "", "")
-
-        if "state" in node["content"]:
-            roadmapItem.set_value("state", node["content"]["state"])
-
-        if "trackedIssues" in node["content"]:
-            if (node["content"]["trackedIssues"]["totalCount"] > 0):
-                roadmapItem.setTrackedIssues(node["content"]["trackedIssues"])
-
-        if "bodyHTML" in node["content"]:
-            roadmapItem.task_summary = get_text_from_bodyHtml(
-                node["content"]["bodyHTML"], 'Overordnet beskrivelse')
-
-        if "url" in node["content"]:
-            roadmapItem.set_value("url", node["content"]["url"])
-
+    for github_project_node in githubProjectNodes:
         includeItem = False
-        for n in node["fieldValues"]["nodes"]:
-            if n["__typename"] == "ProjectV2ItemFieldLabelValue":
+        roadmapItem = DigdirRoadmapItem(
+            github_project_node["content"]["title"], "", "")
+
+        for fieldValue_node in github_project_node["fieldValues"]["nodes"]:
+            if fieldValue_node["__typename"] == "ProjectV2ItemFieldLabelValue":
                 labels = []
-                for nn in n["labels"]["nodes"]:
-                    if "product/" in nn["name"]:
-                        if nn["name"] in filter:
+                for labels_node in fieldValue_node["labels"]["nodes"]:
+                    if "product/" in labels_node["name"]:
+                        if labels_node["name"] in filter:
                             includeItem = True
-                        roadmapItem.set_value("product", nn["name"])
-                    roadmapItem.set_value("labels", nn["name"])
-                    labels.append(nn["name"])
-            elif n["__typename"] == "ProjectV2ItemFieldSingleSelectValue":
-                roadmapItem.set_value(n["field"]["name"], n["name"])
-            elif n["__typename"] == "ProjectV2ItemFieldTextValue":
-                roadmapItem.set_value(n["field"]["name"], n["text"])
-            elif n["__typename"] == "ProjectV2ItemFieldNumberValue":
-                roadmapItem.set_value(n["field"]["name"], n["number"])
-            elif n["__typename"] == "ProjectV2ItemFieldDateValue":
-                roadmapItem.set_value(n["field"]["name"], n["date"])
-            elif n["__typename"] == "ProjectV2ItemFieldMilestoneValue":
+                        else:
+                            break
+                        roadmapItem.set_value("product", labels_node["name"])
+                    roadmapItem.set_value("labels", labels_node["name"])
+                    labels.append(labels_node["name"])
+            elif fieldValue_node["__typename"] == "ProjectV2ItemFieldSingleSelectValue":
                 roadmapItem.set_value(
-                    n["field"]["name"], n["milestone"]["title"])
+                    fieldValue_node["field"]["name"], fieldValue_node["name"])
+            elif fieldValue_node["__typename"] == "ProjectV2ItemFieldTextValue":
+                roadmapItem.set_value(
+                    fieldValue_node["field"]["name"], fieldValue_node["text"])
+            elif fieldValue_node["__typename"] == "ProjectV2ItemFieldNumberValue":
+                roadmapItem.set_value(
+                    fieldValue_node["field"]["name"], fieldValue_node["number"])
+            elif fieldValue_node["__typename"] == "ProjectV2ItemFieldDateValue":
+                roadmapItem.set_value(
+                    fieldValue_node["field"]["name"], fieldValue_node["date"])
+            elif fieldValue_node["__typename"] == "ProjectV2ItemFieldMilestoneValue":
+                roadmapItem.set_value(
+                    fieldValue_node["field"]["name"], fieldValue_node["milestone"]["title"])
+
+        if "state" in github_project_node["content"]:
+            roadmapItem.set_value(
+                "state", github_project_node["content"]["state"])
+
+        if "trackedIssues" in github_project_node["content"]:
+            if (github_project_node["content"]["trackedIssues"]["totalCount"] > 0):
+                roadmapItem.setTrackedIssues(
+                    github_project_node["content"]["trackedIssues"])
+
+        if "bodyHTML" in github_project_node["content"]:
+            body_html = github_project_node["content"]["bodyHTML"]
+            beatifullSoap = BeautifulSoup(body_html, 'html.parser')
+            roadmapItem.dependencies = get_dependencies(beatifullSoap)
+            roadmapItem.task_summary = get_task_summary(beatifullSoap)
+
+        if "url" in github_project_node["content"]:
+            roadmapItem.set_value("url", github_project_node["content"]["url"])
 
         if (includeItem):
             roadmapItems.append(roadmapItem)
-
-        includeItem = True
-
     return roadmapItems
 
 
-def get_text_from_bodyHtml(html: str, section_header: str):
+def get_csvfield_with_newline(fieldvalues: list):
 
-    main_section = re.compile(MAIN_SECTIONS_REGEX_PATTERN)
-    main_section_matches = main_section.findall(html)
+    text = ""
+    for i, item in enumerate(fieldvalues):
+        if i:
+            text += '\n'
+        text += item
 
-    for header_with_description_group in main_section_matches:
-        if header_with_description_group[1] == section_header:
-            for group_item in header_with_description_group:
-                discription = re.findall(DISCRIPTION_REGEX_PATTERN, group_item)
-                if discription:
-                    return discription[0][1]
+    return text
+
+
+def get_task_summary(soup: BeautifulSoup):
+    beskrivelse = ''
+    overorndet_beskrivelse = soup.find(
+        ['h1', 'h2', 'h3'], string='Overordnet beskrivelse')
+    if overorndet_beskrivelse is not None:
+        paragraps = []
+        for sibling in overorndet_beskrivelse.next_siblings:
+            # print(repr(sibling))
+            if sibling.name == 'p':
+                paragraps.append(sibling.text)
+            if sibling.name in ['h1', 'h2', 'h3']:
+                break
+
+        beskrivelse = get_csvfield_with_newline(paragraps)
+
+    return beskrivelse
+
+
+def get_dependencies(soup: BeautifulSoup):
+    dependencies = ''
+    avhengigheter_header = soup.find('h3', string='Avhengigheter')
+    if (avhengigheter_header is not None):
+        tacking_section = avhengigheter_header.find_parent("tracking-block")
+        if tacking_section is None:
+            return dependencies
+
+        links = tacking_section.findAll('a')
+        dependencies_list = []
+        # each issue has two spans name and id#repo
+        for link in links:
+            text = ''
+            spans = link.findAll('span')
+            for i, span in enumerate(spans):
+                if i:
+                    text += ' - '
+                text += span.string
+            dependencies_list.append(text)
+
+            # for span in spans:
+            #     text = text + " - " + span.string
+
+            # dependencies_list.append(text)
+
+        dependencies = get_csvfield_with_newline(dependencies_list)
+
+    return dependencies
