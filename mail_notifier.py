@@ -26,7 +26,7 @@ def main() -> None:
 
     if config is not None:
         reciepients = config['mail']["mail_receipients"]
-        shold_send_mail = config["send_notification_mail"]
+        shold_send_mail = config['mail']["send_notification_mail"]
         release_url = config["latest_release_url"]
 
     if shold_send_mail is None or reciepients is None or release_url is None:
