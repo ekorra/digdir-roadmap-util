@@ -1,14 +1,15 @@
 from gql import Client, gql
-from gql.transport.aiohttp import AIOHTTPTransport
+# from gql.transport.aiohttp import AIOHTTPTransport
+from gql.transport.requests import RequestsHTTPTransport
 
 
 def getGithubProjectNodes(authorizationToken):
     # Select your transport with a defined url endpoint
-    transport = AIOHTTPTransport(url="https://api.github.com/graphql", headers={
-        'Authorization': authorizationToken})
+    transport = RequestsHTTPTransport(url="https://api.github.com/graphql", headers={
+        'Authorization': authorizationToken}, verify=True, retries=5, timeout=60)
     # Create a GraphQL client using the defined transport
     client = Client(transport=transport,
-                    fetch_schema_from_transport=False, execute_timeout=60)
+                    fetch_schema_from_transport=False)
 
     hasNextPage = True
     params = {"after": ""}
