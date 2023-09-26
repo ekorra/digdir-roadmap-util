@@ -3,7 +3,7 @@ name: Roadmap report generator - TEST12
 on:
   workflow_dispatch:
   schedule:
-    - cron: '0 12 * * 2-7' # At minute 0 past hour 12 on every day-of-week from Tuesday through Sunday.
+    - cron: '0 12 * * 2,3,4,5' # At minute 0 past hour 12 on every day-of-week from Tuesday through Sunday.
 
 jobs:
   release:
