@@ -47,9 +47,16 @@ def generate_csv(roadmapItems: DigdirRoadmapItem):
                          "Closed",
                          "Avhengigheter",
                          "URL",
-                         "Nye altinn"])
+                         "Nye altinn",
+                         "BRG",
+                         "SKD",
+                         "SSB"])
     for roadmap_item in roadmapItems:
-        has_nye_altinn = 'program/nye-altinn' in roadmap_item.labels
+        has_nye_altinn_label = 'program/nye-altinn' in roadmap_item.labels
+        has_brg_label = 'org/brg' in roadmap_item.labels
+        has_skd_label = 'org/skd' in roadmap_item.labels
+        has_ssb_label = 'org/ssb' in roadmap_item.labels
+
         csv_writer.writerow([roadmap_item.title,
                             roadmap_item.task_summary,
                             roadmap_item.product,
@@ -62,6 +69,9 @@ def generate_csv(roadmapItems: DigdirRoadmapItem):
                             roadmap_item.numberOfSovedIssues,
                             roadmap_item.dependencies,
                             roadmap_item.url,
-                            has_nye_altinn])
+                            has_nye_altinn_label,
+                            has_brg_label,
+                            has_skd_label,
+                            has_ssb_label])
     csv_output.seek(0)
     return csv_output
