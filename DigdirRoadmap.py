@@ -37,6 +37,7 @@ class DigdirRoadmapItem:
         self.estimerte_ukesverk = None
         self.body_html = None
         self.dependencies = None
+        self.milestone = None
         self.labels = []
 
     def __str__(self):
@@ -58,6 +59,7 @@ class DigdirRoadmapItem:
             "solved": self.numberOfSovedIssues,
             "estimated_work": self.estimerte_ukesverk,
             "dependencies": self.dependencies,
+            "milestone": self.milestone,
             "labels": self.labels
         }.items()
 
@@ -94,6 +96,8 @@ class DigdirRoadmapItem:
             self.state = value
         elif key_lower == "estimerte ukesverk":
             self.estimerte_ukesverk = value
+        elif key_lower == "milestone":
+            self.milestone = value
 
     def setTrackedIssues(self, trackedIssue):
         self.numberOfTrackedIssues = trackedIssue["totalCount"]
