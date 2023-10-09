@@ -2,6 +2,7 @@ mail:
       send_notification_mail: True
       mail_receipients: 
             - espen.korra@digdir.no
+            - kjersti.framnes@accenture.com
 
 projects: 
       - product/autorisasjon
