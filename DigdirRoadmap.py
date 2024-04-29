@@ -77,7 +77,7 @@ class DigdirRoadmapItem:
             self.task_summary = value
         elif key_lower == "start":
             self.start = value
-        elif key_lower == "end":
+        elif key_lower == "sluttdato":
             self.end = value
         elif key_lower == "status":
             self.status = value
