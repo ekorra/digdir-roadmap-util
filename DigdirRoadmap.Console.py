@@ -8,6 +8,7 @@ import pickle
 import shutil
 import datetime
 import yaml
+import time
 
 
 parser = argparse.ArgumentParser()
@@ -16,7 +17,7 @@ parser.add_argument("--type", default="screen",
 parser.add_argument("--save_binary", action=argparse.BooleanOptionalAction)
 parser.add_argument("--testrun", action=argparse.BooleanOptionalAction)
 parser.set_defaults(testrun=False)
-parser.set_defaults(save_binarly=False)
+parser.set_defaults(save_binary=False)
 args = parser.parse_args()
 
 authorizationToken = smtp_account = os.getenv("DIGIDIR_ROADMAP_TOKEN")
@@ -28,7 +29,13 @@ with open("config_test.yml", "r") as config_objct:
     devmode = config["devlop_mode"]
 
 if args.testrun == False:
+    starttime = time.perf_counter()
+
     roadmapItems = getDigdirRoadmap(authorizationToken, filter, devmode)
+
+    endtime = time.perf_counter()
+    print(
+        f" Total kjøretid getDigdirRoadmap: {endtime - starttime:.2f} seconds")
     if args.save_binary == True:
         with open('output/roadmap.pickle', 'wb') as handle:
             pickle.dump(roadmapItems, handle, protocol=pickle.HIGHEST_PROTOCOL)

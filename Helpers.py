@@ -51,7 +51,9 @@ def generate_csv(roadmapItems: DigdirRoadmapItem):
                          "Nye altinn",
                          "BRG",
                          "SKD",
-                         "SSB"])
+                         "SSB",
+                         "Closed at",
+                         "Closed by"])
     for roadmap_item in roadmapItems:
         has_nye_altinn_label = 'program/nye-altinn' in roadmap_item.labels
         has_brg_label = 'org/brg' in roadmap_item.labels
@@ -74,6 +76,8 @@ def generate_csv(roadmapItems: DigdirRoadmapItem):
                             has_nye_altinn_label,
                             has_brg_label,
                             has_skd_label,
-                            has_ssb_label])
+                            has_ssb_label,
+                            roadmap_item.closed_datetime,
+                            roadmap_item.closed_by])
     csv_output.seek(0)
     return csv_output

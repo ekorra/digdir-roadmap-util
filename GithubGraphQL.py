@@ -1,33 +1,90 @@
+import asyncio
+import backoff
+import time
 from gql import Client, gql
-# from gql.transport.aiohttp import AIOHTTPTransport
-from gql.transport.requests import RequestsHTTPTransport
+from gql.transport.aiohttp import AIOHTTPTransport
+import aiohttp
 
 
-def getGithubProjectNodes(authorizationToken):
-    # Select your transport with a defined url endpoint
-    transport = RequestsHTTPTransport(url="https://api.github.com/graphql", headers={
-        'Authorization': authorizationToken}, verify=True, retries=5, timeout=60)
-    # Create a GraphQL client using the defined transport
-    client = Client(transport=transport,
-                    fetch_schema_from_transport=False)
+# Define backoff logic
+@backoff.on_exception(
+    backoff.expo,
+    (aiohttp.ClientResponseError, asyncio.TimeoutError),
+    max_tries=5,
+    jitter=backoff.full_jitter
+)
+async def getGithubProjectNodesAsync(authorizationToken):
 
-    hasNextPage = True
-    params = {"after": ""}
-    nodes = []
-    query = getQuery()
-    while hasNextPage:
-        result = client.execute(query, variable_values=params)
-        nodesToAdd = result["organization"]["projectV2"]["items"]["nodes"]
-        nodes = nodes + nodesToAdd
+    transport = AIOHTTPTransport(
+        url="https://api.github.com/graphql", headers={'Authorization': authorizationToken, 'Accept-Encoding': 'gzip'}, timeout=60)
 
-        hasNextPage = result["organization"]["projectV2"]["items"]["pageInfo"]["hasNextPage"]
-        if hasNextPage:
-            params["after"] = result["organization"]["projectV2"]["items"]["pageInfo"]["endCursor"]
+    async with Client(transport=transport, fetch_schema_from_transport=True, execute_timeout=600) as session:
+        hasNextPage = True
+        params = {"after": ""}
+        nodes = []
+        query = getProjectFieldsQuery()
 
-    return nodes
+        starttime = time.perf_counter()
+        while hasNextPage:
+            try:
+                intermediet_time1 = time.perf_counter()
+                result = await session.execute(query, variable_values=params)
+
+                nodesToAdd = result["organization"]["projectV2"]["items"]["nodes"]
+                nodes = nodes + nodesToAdd
+
+                hasNextPage = result["organization"]["projectV2"]["items"]["pageInfo"]["hasNextPage"]
+                if hasNextPage:
+                    params["after"] = result["organization"]["projectV2"]["items"]["pageInfo"]["endCursor"]
+            except Exception as e:
+                print(e)
+                raise e
+            finally:
+                intermediet_time2 = time.perf_counter()
+                print(
+                    f" Real time: {intermediet_time2 - intermediet_time1:.2f} seconds")
+
+        endtime = time.perf_counter()
+
+        print(f" Total kjøretid: {endtime - starttime:.2f} seconds")
+        return nodes
 
 
-def getQuery():
+# Define backoff logic
+@backoff.on_exception(
+    backoff.expo,
+    (aiohttp.ClientResponseError, asyncio.TimeoutError),
+    max_tries=5,
+    jitter=backoff.full_jitter)
+async def Get_github_issue_async(authorizationToken, issue_number: int):
+    query = get_issue_query(issue_number)
+    params = {'issuenubmer': issue_number}
+    transport = AIOHTTPTransport(
+        url="https://api.github.com/graphql", headers={'Authorization': authorizationToken, 'Accept-Encoding': 'gzip'}, timeout=10)
+    starttime = time.perf_counter()
+
+    async with Client(transport=transport, fetch_schema_from_transport=False, execute_timeout=600) as session:
+        try:
+            result = await session.execute(query, variable_values=params)
+            return result['repository']['issue']
+        except Exception as e:
+            print(f'issue {issue_number} failed: {e} ')
+            raise e
+
+        endtime = time.perf_counter()
+
+        print(f" Issue {issue_number} : {endtime - starttime:.2f} seconds")
+
+
+def get_github_projects(authorizationToken):
+    return asyncio.run(getGithubProjectNodesAsync(authorizationToken))
+
+
+def get_github_issue(authorizationToken, issue_number: int):
+    return asyncio.run(Get_github_issue_async(authorizationToken, issue_number))
+
+
+def getProjectFieldsQuery():
     return gql("""
         query GitHubProjects($after: String = "") {
             organization(login: "digdir") {
@@ -53,17 +110,10 @@ def getQuery():
                     id
                     content {
                         ... on Issue {
-                        title
-                        bodyHTML
-                        number
-                        url
-                        state
-                        trackedIssues(first:50){
-                            totalCount
-                            nodes {
+                            title
+                            number
+                            url
                             state
-                            }
-                        }
                         } 
                         ... on DraftIssue {title}
                     }
@@ -129,3 +179,38 @@ def getQuery():
         }
     }
     """)
+
+
+def get_issue_query(id: int):
+    return gql('''
+        query GithubIssue($issuenubmer: Int=4) {
+            repository(owner: "digdir", name: "roadmap") {
+                issue(number: $issuenubmer) {
+                title
+                number 
+                url
+                state
+                trackedIssuesCount
+                trackedIssues(first:50){
+                    totalCount
+                    nodes {
+                    state
+                    title
+                    }
+                }
+                timelineItems(first: 50) {
+                    nodes {
+                        __typename
+                        ... on ClosedEvent {
+                            createdAt
+                            actor {
+                                login
+                            }
+                        }
+                    }
+                }
+                bodyHTML
+                }
+            }
+        } 
+    ''')

@@ -1,4 +1,5 @@
-from GithubGraphQL import getGithubProjectNodes
+from GithubGraphQL import get_github_projects
+from GithubGraphQL import get_github_issue
 from json import JSONEncoder
 from datetime import datetime
 from bs4 import BeautifulSoup
@@ -21,12 +22,12 @@ def default(obj):
 
 
 class DigdirRoadmapItem:
-    def __init__(self, title, number, url, state=None):
+    def __init__(self, title, number=0):
         self.title = title
         self.task_summary = None
         self.number = number
         self.product = None
-        self.url = url
+        self.url = None
         self.start = None
         self.end = None
         self.status = None
@@ -39,6 +40,8 @@ class DigdirRoadmapItem:
         self.dependencies = None
         self.milestone = None
         self.labels = []
+        self.closed_datetime = None
+        self.closed_by = None
 
     def __str__(self):
         return json.dumps(dict(self), ensure_ascii=False)
@@ -60,7 +63,9 @@ class DigdirRoadmapItem:
             "estimated_work": self.estimerte_ukesverk,
             "dependencies": self.dependencies,
             "milestone": self.milestone,
-            "labels": self.labels
+            "labels": self.labels,
+            "closed_datetime": self.closed_datetime,
+            "closed_by": self.closed_by
         }.items()
 
     def __repr__(self) -> str:
@@ -98,8 +103,10 @@ class DigdirRoadmapItem:
             self.estimerte_ukesverk = value
         elif key_lower == "milestone":
             self.milestone = value
+        elif key_lower == "closed_datetime":
+            self.closed_datetime = value
 
-    def setTrackedIssues(self, trackedIssue):
+    def __setTrackedIssues(self, trackedIssue):
         self.numberOfTrackedIssues = trackedIssue["totalCount"]
 
         closed = 0
@@ -111,6 +118,47 @@ class DigdirRoadmapItem:
 
         self.numberOfSovedIssues = closed
 
+    def __set_closed_Info(self, timeline_items):
+        closed_at = None
+        closed_by = None
+
+        for timeline_item_node in timeline_items["nodes"]:
+            if timeline_item_node['__typename'] == 'ClosedEvent':
+                if closed_at is None:
+                    closed_at = datetime.strptime(
+                        timeline_item_node['createdAt'], '%Y-%m-%dT%H:%M:%SZ')
+                    closed_by = timeline_item_node['actor']['login']
+                else:
+                    tmp_closed_at = datetime.strptime(
+                        timeline_item_node['createdAt'], '%Y-%m-%dT%H:%M:%SZ')
+
+                    if tmp_closed_at > closed_at:
+                        closed_at = tmp_closed_at
+                        closed_by = timeline_item_node['actor']['login']
+
+        self.closed_datetime = closed_at
+        self.closed_by = closed_by
+
+    def get_issue_info(self, authorizationToken: str):
+        issue = get_github_issue(authorizationToken, self.number)
+
+        if "trackedIssues" in issue:
+            if (issue["trackedIssues"]["totalCount"] > 0):
+                self.__setTrackedIssues(
+                    issue["trackedIssues"])
+
+        if "bodyHTML" in issue:
+            body_html = issue["bodyHTML"]
+            beatifullSoap = BeautifulSoup(body_html, 'html.parser')
+            self.dependencies = get_dependencies(beatifullSoap)
+            self.task_summary = get_task_summary(beatifullSoap)
+
+        if "url" in issue:
+            self.set_value("url", issue["url"])
+
+        if "timelineItems" in issue:
+            self.__set_closed_Info(issue['timelineItems'])
+
 
 def getDigdirRoadmap(authorizationToken: str, filter: list, save_github_response=False):
     if (save_github_response):
@@ -120,18 +168,22 @@ def getDigdirRoadmap(authorizationToken: str, filter: list, save_github_response
             with open(f'output/{filename}', 'r') as openfile:
                 githubProjectNodes = json.load(openfile)
         else:
-            githubProjectNodes = getGithubProjectNodes(authorizationToken)
+            githubProjectNodes = get_github_projects(authorizationToken)
             githubProjectNodes_json = json.dumps(githubProjectNodes)
             with open(f'output/{filename}', "w") as outfile:
                 outfile.write(githubProjectNodes_json)
     else:
-        githubProjectNodes = getGithubProjectNodes(authorizationToken)
+        githubProjectNodes = get_github_projects(authorizationToken)
 
     roadmapItems = []
     for github_project_node in githubProjectNodes:
         includeItem = False
+        issuenumber = 0
+        if ('number' in github_project_node["content"]):
+            issuenumber = github_project_node["content"]["number"]
         roadmapItem = DigdirRoadmapItem(
-            github_project_node["content"]["title"], "", "")
+
+            github_project_node["content"]["title"], issuenumber)
 
         for fieldValue_node in github_project_node["fieldValues"]["nodes"]:
             if fieldValue_node["__typename"] == "ProjectV2ItemFieldLabelValue":
@@ -165,21 +217,11 @@ def getDigdirRoadmap(authorizationToken: str, filter: list, save_github_response
             roadmapItem.set_value(
                 "state", github_project_node["content"]["state"])
 
-        if "trackedIssues" in github_project_node["content"]:
-            if (github_project_node["content"]["trackedIssues"]["totalCount"] > 0):
-                roadmapItem.setTrackedIssues(
-                    github_project_node["content"]["trackedIssues"])
-
-        if "bodyHTML" in github_project_node["content"]:
-            body_html = github_project_node["content"]["bodyHTML"]
-            beatifullSoap = BeautifulSoup(body_html, 'html.parser')
-            roadmapItem.dependencies = get_dependencies(beatifullSoap)
-            roadmapItem.task_summary = get_task_summary(beatifullSoap)
-
-        if "url" in github_project_node["content"]:
-            roadmapItem.set_value("url", github_project_node["content"]["url"])
-
         if (includeItem):
+            if (roadmapItem.number != 0):
+                roadmapItem.get_issue_info(authorizationToken)
+            else:
+                print(f'Roadmapissue mangler nummeer - {roadmapItem.title}')
             roadmapItems.append(roadmapItem)
     return roadmapItems
 
@@ -202,7 +244,6 @@ def get_task_summary(soup: BeautifulSoup):
     if overorndet_beskrivelse is not None:
         paragraps = []
         for sibling in overorndet_beskrivelse.next_siblings:
-            # print(repr(sibling))
             if sibling.name == 'p':
                 paragraps.append(sibling.text)
             if sibling.name in ['h1', 'h2', 'h3']:
