@@ -118,7 +118,7 @@ class DigdirRoadmapItem:
 
         self.numberOfSovedIssues = closed
 
-    def __set_closed_Info(self, timeline_items):
+    def set_closed_Info(self, timeline_items):
         closed_at = None
         closed_by = None
 
@@ -157,7 +157,7 @@ class DigdirRoadmapItem:
             self.set_value("url", issue["url"])
 
         if "timelineItems" in issue:
-            self.__set_closed_Info(issue['timelineItems'])
+            self.set_closed_Info(issue['timelineItems'])
 
 
 def getDigdirRoadmap(authorizationToken: str, filter: list, save_github_response=False):
