@@ -123,7 +123,7 @@ class DigdirRoadmapItem:
         closed_by = None
 
         for timeline_item_node in timeline_items["nodes"]:
-            if timeline_item_node['__typename'] == 'ClosedEvent':
+            if timeline_item_node is not None and timeline_item_node['__typename'] == 'ClosedEvent':
                 if closed_at is None:
                     closed_at = datetime.strptime(
                         timeline_item_node['createdAt'], '%Y-%m-%dT%H:%M:%SZ')
