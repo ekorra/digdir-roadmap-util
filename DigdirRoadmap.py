@@ -157,7 +157,11 @@ class DigdirRoadmapItem:
             self.set_value("url", issue["url"])
 
         if "timelineItems" in issue:
-            self.set_closed_Info(issue['timelineItems'])
+            try:
+                self.set_closed_Info(issue['timelineItems'])
+            except Exception as e:
+                print(
+                    f"set closed info failed for issue nr {self.number}  url: {self.url} exception: {e}")
 
 
 def getDigdirRoadmap(authorizationToken: str, filter: list, save_github_response=False):
