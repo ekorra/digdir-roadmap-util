@@ -123,18 +123,24 @@ class DigdirRoadmapItem:
         closed_by = None
 
         for timeline_item_node in timeline_items["nodes"]:
-            if timeline_item_node is not None and timeline_item_node['__typename'] == 'ClosedEvent':
-                if closed_at is None:
-                    closed_at = datetime.strptime(
-                        timeline_item_node['createdAt'], '%Y-%m-%dT%H:%M:%SZ')
-                    closed_by = timeline_item_node['actor']['login']
-                else:
-                    tmp_closed_at = datetime.strptime(
-                        timeline_item_node['createdAt'], '%Y-%m-%dT%H:%M:%SZ')
-
-                    if tmp_closed_at > closed_at:
-                        closed_at = tmp_closed_at
+            try:
+                if timeline_item_node is not None and timeline_item_node['__typename'] == 'ClosedEvent':
+                    if closed_at is None:
+                        closed_at = datetime.strptime(
+                            timeline_item_node['createdAt'], '%Y-%m-%dT%H:%M:%SZ')
                         closed_by = timeline_item_node['actor']['login']
+                    else:
+                        tmp_closed_at = datetime.strptime(
+                            timeline_item_node['createdAt'], '%Y-%m-%dT%H:%M:%SZ')
+
+                        if tmp_closed_at > closed_at:
+                            closed_at = tmp_closed_at
+                            closed_by = timeline_item_node['actor']['login']
+            except TypeError as e:
+                print(
+                    f"set closed info failed for issue nr {self.number}  url: {self.url} exception: {e}")
+                print(timeline_items)
+                pass
 
         self.closed_datetime = closed_at
         self.closed_by = closed_by
@@ -157,11 +163,7 @@ class DigdirRoadmapItem:
             self.set_value("url", issue["url"])
 
         if "timelineItems" in issue:
-            try:
-                self.set_closed_Info(issue['timelineItems'])
-            except Exception as e:
-                print(
-                    f"set closed info failed for issue nr {self.number}  url: {self.url} exception: {e}")
+            self.set_closed_Info(issue['timelineItems'])
 
 
 def getDigdirRoadmap(authorizationToken: str, filter: list, save_github_response=False):
