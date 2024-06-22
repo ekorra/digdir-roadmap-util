@@ -7,6 +7,9 @@ import json
 import os.path
 
 
+__folder_path__ = f'output/{datetime.now().strftime("%d%m%y")}'
+
+
 class MyJSONEncoder(JSONEncoder):
     def default(self, o):
         if isinstance(o, DigdirRoadmapItem):
@@ -145,8 +148,18 @@ class DigdirRoadmapItem:
         self.closed_datetime = closed_at
         self.closed_by = closed_by
 
-    def get_issue_info(self, authorizationToken: str):
-        issue = get_github_issue(authorizationToken, self.number)
+    def get_issue_info(self, authorizationToken: str, save_output=False):
+        if (save_output):
+            filename = self.number
+            if (os.path.isfile(f'{__folder_path__}/{filename}')):
+                with open(f'{__folder_path__}/{filename}', 'r') as openfile:
+                    issue = json.load(openfile)
+            else:
+                issue = get_github_issue(authorizationToken, self.number)
+                with open(f'{__folder_path__}/{filename}', "w") as outfile:
+                    outfile.write(json.dumps(issue))
+        else:
+            issue = get_github_issue(authorizationToken)
 
         if "trackedIssues" in issue:
             if (issue["trackedIssues"]["totalCount"] > 0):
@@ -166,17 +179,19 @@ class DigdirRoadmapItem:
             self.set_closed_Info(issue['timelineItems'])
 
 
-def getDigdirRoadmap(authorizationToken: str, filter: list, save_github_response=False):
-    if (save_github_response):
-        filename = f'githubresponse_{datetime.now().strftime("%d%m%y")}'
-        if (os.path.isfile(f'output/{filename}')):
+def getDigdirRoadmap(authorizationToken: str, filter: list, save_output=False):
+    if save_output:
+        filename = 'project_response'
+        if not os.path.exists(__folder_path__):
+            os.makedirs(__folder_path__)
 
-            with open(f'output/{filename}', 'r') as openfile:
+        if os.path.isfile(f'{__folder_path__}/{filename}'):
+            with open(f'{__folder_path__}/{filename}', 'r') as openfile:
                 githubProjectNodes = json.load(openfile)
         else:
             githubProjectNodes = get_github_projects(authorizationToken)
             githubProjectNodes_json = json.dumps(githubProjectNodes)
-            with open(f'output/{filename}', "w") as outfile:
+            with open(f'{__folder_path__}/{filename}', "w") as outfile:
                 outfile.write(githubProjectNodes_json)
     else:
         githubProjectNodes = get_github_projects(authorizationToken)
@@ -225,7 +240,7 @@ def getDigdirRoadmap(authorizationToken: str, filter: list, save_github_response
 
         if (includeItem):
             if (roadmapItem.number != 0):
-                roadmapItem.get_issue_info(authorizationToken)
+                roadmapItem.get_issue_info(authorizationToken, save_output)
             else:
                 print(f'Roadmapissue mangler nummeer - {roadmapItem.title}')
             roadmapItems.append(roadmapItem)
