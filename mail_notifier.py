@@ -43,8 +43,9 @@ def main() -> None:
 
     date = datetime.datetime.now()
     week = date.strftime("%W")
-    subject = f"Digidir roadmap rapport uke {week}"
-    body = f"{release_name}<br>Rapport for uke {week} kan lastes ned ved å trykke <a href={report_link}>her</a><br>Eventult kan du gå <a href={release_link}>hit</a> og laste den ned"
+    past_week = int(week) - 1
+    subject = f"Digidir roadmap rapport uke {past_week}"
+    body = f"{release_name}<br>Rapport for uke {past_week} kan lastes ned ved å trykke <a href={report_link}>her</a><br>Eventult kan du gå <a href={release_link}>hit</a> og laste den ned"
 
     try:
         password = os.environ["SMTP_PASSWORD"]
