@@ -1,4 +1,5 @@
 import unittest
+import uuid
 # from unittest.mock import Mock
 from unittest.mock import patch
 from DigdirRoadmap import *
@@ -8,16 +9,32 @@ from DigdirRoadmap import DigdirRoadmapItem
 
 class DigdirRoadmapTest(unittest.TestCase):
 
-    EXPECTED_STATE = 'CLOSED'
-    EXPECTED_ID = 'test_id'
-    EXPECTED_STATUS = 'levert'
+    # EXPECTED_STATE = 'CLOSED'
+    # EXPECTED_ID = 'test_id'
+    # EXPECTED_STATUS = 'levert'
+
+    def setUp(self):
+        self.expeded_state = 'CLOSED'
+        self.expced_id = uuid.uuid4()
+        self.expected_status = 'Levert'
+        self.epxeded_progression = 100
+        self.title_prefix = 'Title prefix'
+        self.expected_other_label = 'program/nye-altinn'
+        self.expected_start = '2023-06-01'
+        self.expected_end = '2023-11-30'
+        self.expected_estimerte_ukesverk = 10
+        self.expected_product = 'test_issue_include'
+        self.expected_product_label = f'product/{self.expected_product}'
+
+        # extended itemInof
+        self.expected_url = 'https://test.no'
 
     @patch('DigdirRoadmap.get_github_projects')
     @patch('DigdirRoadmap.DigdirRoadmapItem.get_issue_info')
     def test_get_digdir_roadmap(self, mock2, githubgrapql_patch):
 
-        test_issue_include = self.getNode(123, 'test_issue_include')
-        test_issue_exclude = self.getNode(456, 'test_issue_exclude')
+        test_issue_include = self.getNode(123, 'product/test_issue_include')
+        test_issue_exclude = self.getNode(456, 'product/test_issue_exclude')
 
         githubgrapql_patch.return_value = [
             test_issue_include, test_issue_exclude]
@@ -28,15 +45,45 @@ class DigdirRoadmapTest(unittest.TestCase):
         self.assertEqual(123, roadmap_items[0].number)
         self.assertTrue(mock2.called)
 
-    def getNode(self, issue_number: int, product_name):
+    @patch('DigdirRoadmap.get_github_projects')
+    @patch('DigdirRoadmap.DigdirRoadmapItem.get_issue_info')
+    def test_integration_roadmapitem_properties_set(self, mock2, githubgrapql_patch):
+
+        expcted_issue_number = 123
+        expted_title = f'{self.title_prefix} {expcted_issue_number}'
+
+        test_issue_include = self.getNode(
+            expcted_issue_number, self.expected_product_label)
+
+        githubgrapql_patch.return_value = [
+            test_issue_include]
+
+        roadmap_items = getDigdirRoadmap(
+            'token', [self.expected_product_label])
+
+        self.assertEqual(expcted_issue_number, roadmap_items[0].number)
+        self.assertEqual(expted_title, roadmap_items[0].title)
+        self.assertEqual(self.expected_status, roadmap_items[0].status)
+        self.assertEqual(self.expeded_state, roadmap_items[0].state)
+        self.assertEqual(
+            self.expected_estimerte_ukesverk, roadmap_items[0].estimerte_ukesverk)
+        self.assertEqual(self.expected_start, roadmap_items[0].start)
+        self.assertEqual(self.expected_end, roadmap_items[0].end)
+        self.assertIn(self.expected_product, roadmap_items[0].product)
+        self.assertEqual(self.epxeded_progression, roadmap_items[0].progresjon)
+        self.assertIn(self.expected_product_label, roadmap_items[0].labels)
+        self.assertIn(self.expected_other_label, roadmap_items[0].labels)
+        # self.assertEqual(self.expected_url, roadmap_items[0].url)
+
+    def getNode(self, issue_number: int, product_label):
         node = {
             '__typename': 'ProjectV2Item',
             'id': 'PVTI_lADOAwyZKM4ANYNjzgIWpY4',
             'content': {
                 'title': f'test tittel {issue_number}',
                 'number': issue_number,
-                'url': f'https://test.com/{issue_number}',
-                'state': 'CLOSED'
+                'url': f'{self.expected_url}',
+                'state': self.expeded_state
             },
             'fieldValues': {
                 'nodes': [
@@ -55,12 +102,12 @@ class DigdirRoadmapTest(unittest.TestCase):
                             'totalCount': 2,
                             'nodes': [
                                 {
-                                    'name': 'program/nye-altinn',
+                                    'name': self.expected_other_label,
                                     'description': 'Del av programmet for moderniseringen av Altinn.',
                                     'url': 'https://github.com/digdir/roadmap/labels/program%2Fnye-altinn'
                                 },
                                 {
-                                    'name': f'product/{product_name}',
+                                    'name': product_label,
                                     'description': 'Varsling og revarsling via epost eller SMS',
                                     'url': 'https://github.com/digdir/roadmap/labels/product%2Fvarsling'
                                 }
@@ -72,42 +119,42 @@ class DigdirRoadmapTest(unittest.TestCase):
                         'field': {
                             'name': 'Title'
                         },
-                        'text': 'Varsling på epost'
+                        'text': f'{self.title_prefix} {issue_number}'
                     },
                     {
                         '__typename': 'ProjectV2ItemFieldSingleSelectValue',
                         'field': {
                             'name': 'Status'
                         },
-                        'name': 'Levert'
+                        'name': self.expected_status
                     },
                     {
                         '__typename': 'ProjectV2ItemFieldNumberValue',
                         'field': {
                             'name': 'Progresjon (%)'
                         },
-                        'number': 100
+                        'number': self.epxeded_progression
                     },
                     {
                         '__typename': 'ProjectV2ItemFieldDateValue',
                         'field': {
                             'name': 'Start'
                         },
-                        'date': '2023-06-01'
+                        'date': self.expected_start
                     },
                     {
                         '__typename': 'ProjectV2ItemFieldDateValue',
                         'field': {
                             'name': 'Sluttdato'
                         },
-                        'date': '2023-11-30'
+                        'date': self.expected_end
                     },
                     {
                         '__typename': 'ProjectV2ItemFieldNumberValue',
                         'field': {
                             'name': 'Estimerte ukesverk'
                         },
-                        'number': 21
+                        'number': self.expected_estimerte_ukesverk
                     }
                 ]
             }
