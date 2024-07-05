@@ -6,3 +6,4 @@ azure-functions
 gql[all]
 PyYAML
 beautifulsoup4
+pytest
