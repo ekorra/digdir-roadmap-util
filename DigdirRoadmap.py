@@ -159,7 +159,7 @@ class DigdirRoadmapItem:
                 with open(f'{__folder_path__}/{filename}', "w") as outfile:
                     outfile.write(json.dumps(issue))
         else:
-            issue = get_github_issue(authorizationToken)
+            issue = get_github_issue(authorizationToken, self.number)
 
         if "trackedIssues" in issue:
             if (issue["trackedIssues"]["totalCount"] > 0):
