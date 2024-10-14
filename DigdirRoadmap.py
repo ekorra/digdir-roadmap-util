@@ -202,9 +202,12 @@ def getDigdirRoadmap(authorizationToken: str, filter: list, save_output=False):
         issuenumber = 0
         if ('number' in github_project_node["content"]):
             issuenumber = github_project_node["content"]["number"]
-        roadmapItem = DigdirRoadmapItem(
 
-            github_project_node["content"]["title"], issuenumber)
+        title = 'Title missing'
+        if ('title' in github_project_node["content"]):
+            title = github_project_node["content"]["title"]
+
+        roadmapItem = DigdirRoadmapItem(title, issuenumber)
 
         for fieldValue_node in github_project_node["fieldValues"]["nodes"]:
             if fieldValue_node["__typename"] == "ProjectV2ItemFieldLabelValue":
