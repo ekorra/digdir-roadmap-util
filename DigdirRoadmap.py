@@ -243,7 +243,12 @@ def getDigdirRoadmap(authorizationToken: str, filter: list, save_output=False):
 
         if (includeItem):
             if (roadmapItem.number != 0):
-                roadmapItem.get_issue_info(authorizationToken, save_output)
+                try:
+                    roadmapItem.get_issue_info(authorizationToken, save_output)
+                except Exception as e:
+                    print(
+                        f'get_issue_info failed for issue nr {roadmapItem.number}  url: {roadmapItem.url} exception: {e}')
+                    pass
             else:
                 print(f'Roadmapissue mangler nummeer - {roadmapItem.title}')
             roadmapItems.append(roadmapItem)
