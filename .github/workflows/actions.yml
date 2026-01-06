@@ -10,7 +10,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: checkout repo content
-        uses: actions/checkout@v4 # checkout the repository content
+        uses: actions/checkout@v6 # checkout the repository content
 
       - name: setup python
         uses: actions/setup-python@v5
@@ -26,12 +26,25 @@ jobs:
         env:
           DIGIDIR_ROADMAP_TOKEN: ${{ secrets.DIGIDIR_ROADMAP_TOKEN }}          
         run: python GithubRelease.py
-
-      - name: Crate release
-        run: gh release create "$(date +'%U')_$(date +'%Y')" "output/roadmap_report.csv" --notes "Digdir roadmap rapport for uke $(date +'%U')<br>Rapport generert $(date +'%d.%m.%Y %R')" -t "Roadmap rapport Uke $(date +'%U')"
+      
+      - name: Create release
+        run: |
+          BASE_TAG="$(date +'%U')_$(date +'%Y')"
+          TAG_NAME="$BASE_TAG"
+          
+          # Check if tag exists
+          if gh release view "$TAG_NAME" &> /dev/null; then
+            echo "Tag $TAG_NAME already exists, adding timestamp"
+            TAG_NAME="${BASE_TAG}_$(date +'%H%M%S')"
+          fi
+          
+          echo "Creating release with tag: $TAG_NAME"
+          gh release create "$TAG_NAME" "output/roadmap_report.csv" \
+            --notes "Digdir roadmap rapport for uke $(date +'%U')<br>Rapport generert $(date +'%d.%m.%Y %R')" \
+            -t "Roadmap rapport Uke $(date +'%U')"
         env:
           GH_TOKEN: ${{ secrets.RELEASE_TOKEN }}
-
+      
       - name: Notify
         env:          
           SMTP_ACCOUNT: ${{ secrets.SMTP_ACCOUNT }}
