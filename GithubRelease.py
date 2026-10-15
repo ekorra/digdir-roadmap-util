@@ -49,5 +49,5 @@ def main() -> any:
 
 
 if __name__ == "__main__":
-    logger.info(f"Token value: {roadmap_token}")
+    # logger.info(f"Token value: {roadmap_token}")
     main()
