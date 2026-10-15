@@ -18,7 +18,7 @@ async def getGithubProjectNodesAsync(authorizationToken):
     transport = AIOHTTPTransport(
         url="https://api.github.com/graphql", headers={'Authorization': authorizationToken, 'Accept-Encoding': 'gzip'}, timeout=60)
 
-    async with Client(transport=transport, fetch_schema_from_transport=True, execute_timeout=600) as session:
+    async with Client(transport=transport, fetch_schema_from_transport=False, execute_timeout=600) as session:
         hasNextPage = True
         params = {"after": ""}
         nodes = []
