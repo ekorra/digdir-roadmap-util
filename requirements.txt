@@ -7,3 +7,5 @@ gql[all]
 PyYAML
 beautifulsoup4
 pytest
+backoff
+requests
